@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+	<name>Admin-Login add Google Recaptcha V2</name>
+	<code>ALAGRV2</code>
+	<version>1.0</version>
+	<link>https://www.renovatiomarketing.hu</link>
+	<email>gegenyrichard@netra.hu</email>
+	<author>Richard G.</author>
+    <file path="admin/controller/common/login.php">
+        <operation>
+            <search><![CDATA[$data['header'] = $this->load->controller('common/header');]]></search>
+            <add position="before"><![CDATA[
+// V3 OC
+$data['google_site_key'] = '';            
+if ($this->config->get('captcha_google_status')) {
+			$this->document->addScript('https://www.google.com/recaptcha/api.js');
+			$data['google_site_key'] = $this->config->get('captcha_google_key');
+} 
+
+// V2 OC
+if ($this->config->get('google_captcha_status')) {
+			$this->document->addScript('https://www.google.com/recaptcha/api.js');			
+			$data['google_site_key'] = $this->config->get('google_captcha_key');
+}
+			
+		]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[if (isset($this->session->data['success'])) {]]></search>
+            <add position="before"><![CDATA[
+		if (isset($this->error['captcha'])) {
+			$data['error_captcha'] = $this->error['captcha'];
+		} else {
+			$data['error_captcha'] = '';
+		}
+]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[protected function validate() {]]></search>
+            <add position="after"><![CDATA[
+		// OC V3
+        if ($this->config->get('captcha_google_status')) {
+                $this->load->language('extension/captcha/google_captcha');
+
+                $recaptcha = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret=' . urlencode($this->config->get('captcha_google_secret')) . '&response=' . $this->request->post['g-recaptcha-response'] . '&remoteip=' . $this->request->server['REMOTE_ADDR']);
+        
+                $recaptcha = json_decode($recaptcha, true);
+        
+                if ($recaptcha['success']) {
+                    $this->session->data['gcapcha']	= true;
+                } else {
+                    $this->error['captcha'] = $this->language->get('error_captcha');
+					return;
+                }
+		}
+		
+		//OC V2
+        if ($this->config->get('google_captcha_status')) {
+                $this->load->language('extension/captcha/google_captcha');
+
+                $recaptcha = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret=' . urlencode($this->config->get('google_captcha_secret')) . '&response=' . $this->request->post['g-recaptcha-response'] . '&remoteip=' . $this->request->server['REMOTE_ADDR']);
+        
+                $recaptcha = json_decode($recaptcha, true);
+        
+                if ($recaptcha['success']) {
+                    $this->session->data['gcapcha']	= true;
+
+                } else {
+                    $this->error['captcha'] = $this->language->get('error_captcha');
+					return;
+				}
+		}
+        ]]></add>
+        </operation>
+    </file>
+    <file path="admin/language/en-gb/common/login.php">
+        <operation>
+            <search><![CDATA[$_['button_login']   = 'Login';]]></search>
+            <add position="after"><![CDATA[
+            $_['entry_captcha']  = 'Enter the code in the box below';
+            $_['error_captcha']  = 'Image verification failed, please re-verify';
+            ]]></add>
+        </operation>
+    </file>
+	
+
+    <file path="admin/view/template/common/login.twig">
+        <operation info="V3 OC" error="skip">
+            <search><![CDATA[<div class="text-right">]]></search>
+            <add position="before"><![CDATA[
+{% if google_site_key %}
+            <div class="form-group" align="center">
+                <div class="g-recaptcha" data-sitekey="{{ google_site_key }}"></div>
+                {% if error_captcha %}
+                  <div class="text-danger">{{ error_captcha }}</div>
+                {% endif %}
+            </div>
+{% endif %}
+]]></add>
+        </operation>
+    </file>
+
+	<file path="admin/view/template/common/login.tpl">
+        <operation info="V2 OC" error="skip">
+            <search><![CDATA[<div class="text-right">]]></search>
+            <add position="before"><![CDATA[
+<?php if($google_site_key){ ?>
+            <div class="form-group" align="center">
+                <div class="g-recaptcha" data-sitekey="<?php echo $google_site_key; ?>"></div>
+				<?php if($error_captcha){ ?>
+                  <div class="text-danger"><?php echo $error_captcha; ?></div>
+                <?php } ?>
+            </div>
+<?php } ?>
+]]></add>
+        </operation>
+    </file>
+</modification>
