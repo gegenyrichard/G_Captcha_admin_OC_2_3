@@ -12,6 +12,8 @@ and your store databse can slow down , or stop working!)
 
 #Install instructions 
 
+Video instructions here: https://www.youtube.com/watch?v=evkpQrY5ypc
+
 ocmod installer
 
 Setting:
