@@ -3,7 +3,7 @@
 This mod allows to add Google reCAPTCHA to you admin login page.
 Opencart versions : 2.x - 3.x
 
-##The real benefits of this mod:
+The real benefits of this mod:
 IT BLOCK all database query until Captcha became walid!
 
 (Default opencart controller every login attempt call $this->user->login() method...
