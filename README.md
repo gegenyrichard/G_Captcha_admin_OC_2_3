@@ -1,6 +1,6 @@
 # Google reCAPTCHA admin area OC 2-3
 
-This mod allows to add Google reCAPTCHA to you admin login page.
+This mod allows to add Google reCAPTCHA admin login page.
 Opencart versions : 2.x - 3.x
 
 The real benefits of this mod:
